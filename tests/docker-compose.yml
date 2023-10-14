@@ -1,0 +1,32 @@
+services:
+  script:
+    build: ../backend
+    image: sqlite_to_postgres
+    volumes:
+      - ../infra/data/db.sqlite:/opt/sqilte_to_postgres/db.sqlite
+    env_file:
+      - ./.env
+
+  tests:
+    image: sqlite_to_postgres
+    volumes:
+      - ../infra/data/db.sqlite:/opt/sqilte_to_postgres/db.sqlite
+      - ./:/opt/sqilte_to_postgres/tests/
+    entrypoint: >
+      sh -c "cd tests/ &&
+             pip install -r requirements.txt &&
+             pytest"
+    env_file:
+      - ./.env
+    depends_on:
+      script:
+        condition: service_completed_successfully
+
+  postgres:
+    image: postgres:14.5-alpine
+    ports:
+      - 5432:5432
+    volumes:
+      - ../infra/data/cinemax_database.sql:/docker-entrypoint-initdb.d/cinemax_database.sql
+    env_file:
+      - ./.env

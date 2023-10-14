@@ -1,0 +1,2 @@
+psycopg2-binary==2.9
+pydantic==1.9.1

@@ -1,0 +1,26 @@
+services:
+  script:
+    image: temirovazat/sqlite_to_postgres:1.0.0
+    volumes:
+      - ./data/db.sqlite:/opt/sqilte_to_postgres/db.sqlite
+    env_file:
+      - ./.env
+
+  postgres:
+    image: postgres:14.5-alpine
+    expose:
+      - 5432
+    volumes:
+      - ./data/cinemax_database.sql:/docker-entrypoint-initdb.d/cinemax_database.sql
+    env_file:
+      - ./.env
+
+  pgadmin:
+    image: dpage/pgadmin4:7.1
+    ports:
+      - 5050:80
+    environment:
+      PGADMIN_DEFAULT_EMAIL: pgadmin4@pgadmin.org
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'

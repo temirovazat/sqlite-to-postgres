@@ -1,0 +1,34 @@
+x-postgres-env: &postgres-env
+  POSTGRES_HOST: postgres
+  POSTGRES_PORT: 5432
+  POSTGRES_DB: cinemax_database
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: postgres
+
+x-sqlite-env: &sqlite-env
+  SQLITE_PATH: /opt/sqilte_to_postgres/db.sqlite
+
+services:
+  script:
+    build: ../../backend
+    volumes:
+      - ../data/db.sqlite:/opt/sqilte_to_postgres/db.sqlite
+    environment:
+      <<: [*postgres-env, *sqlite-env]
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:14.5-alpine
+    ports:
+      - 5432:5432
+    volumes:
+      - ../data/cinemax_database.sql:/docker-entrypoint-initdb.d/cinemax_database.sql
+    environment:
+      <<: *postgres-env
+    healthcheck:
+      test: pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}
+      interval: 5s
+      timeout: 5s
+      retries: 5
